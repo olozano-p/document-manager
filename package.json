@@ -1,0 +1,15 @@
+{
+  "name": "frontend-challenge",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "serve": "python3 -m http.server 8080",
+    "dev": "npm run watch & npm run serve",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
