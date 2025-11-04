@@ -19,7 +19,7 @@ export class NotificationBanner extends HTMLElement {
     const notificationWithId = { ...notification, id };
 
     this.notifications.push(notificationWithId);
-    this.renderNotifications();
+    this.addNotificationElement(notificationWithId);
 
     const duration = notification.duration || 5000;
     setTimeout(() => {
@@ -29,7 +29,7 @@ export class NotificationBanner extends HTMLElement {
 
   private removeNotification(id: string) {
     this.notifications = this.notifications.filter(n => (n as any).id !== id);
-    this.renderNotifications();
+    this.removeNotificationElement(id);
   }
 
   private render() {
@@ -37,7 +37,7 @@ export class NotificationBanner extends HTMLElement {
       <style>
         :host {
           position: fixed;
-          top: 20px;
+          bottom: 20px;
           right: 20px;
           z-index: 1000;
           pointer-events: none;
@@ -45,7 +45,7 @@ export class NotificationBanner extends HTMLElement {
 
         .notifications-container {
           display: flex;
-          flex-direction: column;
+          flex-direction: column-reverse;
           gap: 8px;
           max-width: 400px;
         }
@@ -143,7 +143,7 @@ export class NotificationBanner extends HTMLElement {
 
         @media (max-width: 768px) {
           :host {
-            top: 10px;
+            bottom: 10px;
             right: 10px;
             left: 10px;
           }
@@ -160,37 +160,43 @@ export class NotificationBanner extends HTMLElement {
     this.container = this.shadowRoot!.querySelector('.notifications-container');
   }
 
-  private renderNotifications() {
+  private addNotificationElement(notification: any) {
     if (!this.container) return;
 
-    this.container.innerHTML = '';
+    const notificationEl = document.createElement('div');
+    notificationEl.className = `notification ${notification.type}`;
+    notificationEl.dataset.id = notification.id;
 
-    this.notifications.forEach((notification: any) => {
-      const notificationEl = document.createElement('div');
-      notificationEl.className = `notification ${notification.type}`;
+    notificationEl.innerHTML = `
+      <div class="notification-icon">
+        ${this.getIconSVG(notification.type)}
+      </div>
+      <div class="notification-content">
+        ${notification.message}
+      </div>
+      <button class="close-button" aria-label="Close notification">
+        ${createSVGIcon('close', 16).outerHTML}
+      </button>
+    `;
 
-      const iconType = notification.type === 'success' ? 'check-circle' :
-                      notification.type === 'error' ? 'x-circle' : 'info-circle';
-
-      notificationEl.innerHTML = `
-        <div class="notification-icon">
-          ${this.getIconSVG(notification.type)}
-        </div>
-        <div class="notification-content">
-          ${notification.message}
-        </div>
-        <button class="close-button" aria-label="Close notification">
-          ${createSVGIcon('close', 16).outerHTML}
-        </button>
-      `;
-
-      const closeButton = notificationEl.querySelector('.close-button');
-      closeButton?.addEventListener('click', () => {
-        this.removeNotification(notification.id);
-      });
-
-      this.container?.appendChild(notificationEl);
+    const closeButton = notificationEl.querySelector('.close-button');
+    closeButton?.addEventListener('click', () => {
+      this.removeNotification(notification.id);
     });
+
+    this.container.appendChild(notificationEl);
+  }
+
+  private removeNotificationElement(id: string) {
+    if (!this.container) return;
+
+    const notificationEl = this.container.querySelector(`[data-id="${id}"]`);
+    if (notificationEl) {
+      notificationEl.classList.add('removing');
+      setTimeout(() => {
+        notificationEl.remove();
+      }, 300); // Match the slideOut animation duration
+    }
   }
 
   private getIconSVG(type: 'success' | 'error' | 'info'): string {

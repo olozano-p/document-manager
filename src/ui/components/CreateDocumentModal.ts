@@ -1,9 +1,9 @@
 import { createSVGIcon } from '../utils/dom.js';
-import { Contributor } from '../../types/index.js';
+import { Contributor, Attachment } from '../../types/index.js';
 
 export class CreateDocumentModal extends HTMLElement {
   private isOpen = false;
-  private onSubmitCallback?: (name: string, contributors: Contributor[]) => void;
+  private onSubmitCallback?: (name: string, contributors: Contributor[], attachments: Attachment[]) => void;
 
   constructor() {
     super();
@@ -15,7 +15,7 @@ export class CreateDocumentModal extends HTMLElement {
     this.setupEventListeners();
   }
 
-  open(onSubmit: (name: string, contributors: Contributor[]) => void) {
+  open(onSubmit: (name: string, contributors: Contributor[], attachments: Attachment[]) => void) {
     this.onSubmitCallback = onSubmit;
     this.isOpen = true;
     this.render();
@@ -40,7 +40,7 @@ export class CreateDocumentModal extends HTMLElement {
         this.close();
       }
 
-      if (target.classList.contains('close-button')) {
+      if (target.classList.contains('close-button') || target.closest('.close-button')) {
         this.close();
       }
 
@@ -88,7 +88,20 @@ export class CreateDocumentModal extends HTMLElement {
       })));
     }
 
-    this.onSubmitCallback?.(name, contributors);
+    // Process attachment files
+    const attachmentFiles = formData.getAll('attachments') as File[];
+    const attachments: Attachment[] = [];
+
+    for (const file of attachmentFiles) {
+      if (file && file.name) {
+        attachments.push({
+          name: file.name,
+          size: file.size
+        });
+      }
+    }
+
+    this.onSubmitCallback?.(name, contributors, attachments);
     this.close();
   }
 
@@ -199,6 +212,25 @@ export class CreateDocumentModal extends HTMLElement {
           outline: none;
           border-color: #4f46e5;
           box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .file-input {
+          padding: 6px 8px;
+        }
+
+        .file-input::-webkit-file-upload-button {
+          background: #f3f4f6;
+          border: 1px solid #d1d5db;
+          border-radius: 4px;
+          padding: 4px 12px;
+          margin-right: 12px;
+          font-size: 13px;
+          color: #374151;
+          cursor: pointer;
+        }
+
+        .file-input::-webkit-file-upload-button:hover {
+          background: #e5e7eb;
         }
 
         .form-help {
@@ -323,6 +355,21 @@ export class CreateDocumentModal extends HTMLElement {
               />
               <div class="form-help">
                 Optional. Enter contributor names separated by commas.
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="attachments">Attachments</label>
+              <input
+                type="file"
+                id="attachments"
+                name="attachments"
+                class="form-input file-input"
+                multiple
+                accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
+              />
+              <div class="form-help">
+                Optional. Select one or more files to attach to the document.
               </div>
             </div>
           </form>

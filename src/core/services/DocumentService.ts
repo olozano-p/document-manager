@@ -2,7 +2,7 @@ import { DocumentModel } from '../models/Document.js';
 import { ApiService } from './ApiService.js';
 import { WebSocketService } from './WebSocketService.js';
 import { AppStore } from '../state/AppStore.js';
-import { Document, Contributor, WebSocketMessage, NotificationData } from '../../types/index.js';
+import { Document, Contributor, Attachment, WebSocketMessage, NotificationData } from '../../types/index.js';
 
 export class DocumentService {
   private static instance: DocumentService;
@@ -55,8 +55,8 @@ export class DocumentService {
     return this.loadDocuments();
   }
 
-  createDocument(name: string, contributors: Contributor[] = []): DocumentModel {
-    const newDocument = DocumentModel.createNew(name, contributors);
+  createDocument(name: string, contributors: Contributor[] = [], attachments: Attachment[] = []): DocumentModel {
+    const newDocument = DocumentModel.createNew(name, contributors, attachments);
     this.store.addDocument(newDocument);
     return newDocument;
   }
@@ -65,13 +65,28 @@ export class DocumentService {
     this.wsUnsubscribe = this.wsService.onMessageReceived((message: WebSocketMessage) => {
       console.log('Document created by another user:', message.DocumentTitle, 'by', message.UserName);
 
+      // Generate some mock contributors and attachments for WebSocket documents
+      // to match the richness of API documents
+      const contributors = [
+        { name: message.UserName, avatar: '' }, // The actual creator
+        ...Array.from({ length: Math.floor(Math.random() * 3) }, () => ({
+          name: this.generateRandomName(),
+          avatar: ''
+        }))
+      ];
+
+      const attachments = Array.from({ length: Math.floor(Math.random() * 4) + 1 }, () => ({
+        name: this.generateRandomFileName(),
+        size: Math.floor(Math.random() * 5000000) + 100000 // 100KB to 5MB
+      }));
+
       const newDocument = new DocumentModel(
         message.DocumentID,
         message.DocumentTitle,
-        [{ name: message.UserName, avatar: '' }],
+        contributors,
         1,
         message.Timestamp,
-        []
+        attachments
       );
 
       const existingDocuments = this.store.getState().documents;
@@ -143,5 +158,27 @@ export class DocumentService {
         console.error('Error in notification callback:', error);
       }
     });
+  }
+
+  private generateRandomName(): string {
+    const firstNames = ['Alex', 'Jordan', 'Taylor', 'Casey', 'Morgan', 'Riley', 'Cameron', 'Avery', 'Quinn', 'Sage'];
+    const lastNames = ['Smith', 'Johnson', 'Brown', 'Davis', 'Wilson', 'Moore', 'Taylor', 'Anderson', 'Thomas', 'Jackson'];
+
+    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+
+    return `${firstName} ${lastName}`;
+  }
+
+  private generateRandomFileName(): string {
+    const prefixes = ['Project', 'Report', 'Document', 'Spec', 'Design', 'Analysis', 'Summary', 'Draft'];
+    const suffixes = ['v1', 'v2', 'final', 'revised', 'updated', 'complete', 'draft', 'preliminary'];
+    const extensions = ['pdf', 'docx', 'xlsx', 'pptx', 'txt', 'md'];
+
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+    const extension = extensions[Math.floor(Math.random() * extensions.length)];
+
+    return `${prefix}_${suffix}.${extension}`;
   }
 }

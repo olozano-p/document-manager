@@ -32,14 +32,14 @@ export class DocumentModel implements IDocument {
     );
   }
 
-  static createNew(name: string, contributors: Contributor[] = []): DocumentModel {
+  static createNew(name: string, contributors: Contributor[] = [], attachments: Attachment[] = []): DocumentModel {
     return new DocumentModel(
       crypto.randomUUID(),
       name,
       contributors,
       1,
       new Date().toISOString(),
-      []
+      attachments
     );
   }
 

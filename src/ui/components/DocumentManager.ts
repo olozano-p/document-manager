@@ -93,8 +93,8 @@ export class DocumentManager extends HTMLElement {
   }
 
   private openCreateModal() {
-    this.createModal?.open((name, contributors) => {
-      const newDocument = this.documentService.createDocument(name, contributors);
+    this.createModal?.open((name, contributors, attachments) => {
+      const newDocument = this.documentService.createDocument(name, contributors, attachments);
       this.notificationBanner?.showNotification({
         message: `Document "${newDocument.name}" created successfully`,
         type: 'success',
