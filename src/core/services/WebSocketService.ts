@@ -6,7 +6,7 @@ export type ConnectionStatusHandler = (status: 'connected' | 'disconnected' | 'c
 export class WebSocketService {
   private static instance: WebSocketService;
   private ws: WebSocket | null = null;
-  private url = 'ws://localhost:8080/notifications';
+  private url = 'ws://localhost:3001';
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;

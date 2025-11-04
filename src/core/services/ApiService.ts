@@ -3,7 +3,7 @@ import { DocumentModel } from '../models/Document.js';
 
 export class ApiService {
   private static instance: ApiService;
-  private baseUrl = 'http://localhost:8080';
+  private baseUrl = 'http://localhost:3001';
 
   static getInstance(): ApiService {
     if (!ApiService.instance) {
