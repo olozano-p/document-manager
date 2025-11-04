@@ -33,7 +33,7 @@ describe('Store', () => {
         this.state = { ...this.state, ...partial };
 
         if (JSON.stringify(previousState) !== JSON.stringify(this.state)) {
-          this.listeners.forEach(listener => {
+          this.listeners.forEach((listener: (state: any) => void) => {
             try {
               listener({ ...this.state });
             } catch (error) {
