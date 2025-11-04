@@ -2,7 +2,7 @@ import { DocumentModel } from '../models/Document.js';
 import { ApiService } from './ApiService.js';
 import { WebSocketService } from './WebSocketService.js';
 import { AppStore } from '../state/AppStore.js';
-import { Document, Contributor } from '../../types/index.js';
+import { Document, Contributor, WebSocketMessage, NotificationData } from '../../types/index.js';
 
 export class DocumentService {
   private static instance: DocumentService;
@@ -10,6 +10,7 @@ export class DocumentService {
   private wsService: WebSocketService;
   private store: AppStore;
   private wsUnsubscribe: (() => void) | null = null;
+  private notificationCallbacks: Set<(notification: NotificationData) => void> = new Set();
 
   private constructor() {
     this.apiService = ApiService.getInstance();
@@ -61,12 +62,29 @@ export class DocumentService {
   }
 
   private setupWebSocketListeners(): void {
-    this.wsUnsubscribe = this.wsService.onDocumentReceived((document: Document) => {
+    this.wsUnsubscribe = this.wsService.onMessageReceived((message: WebSocketMessage) => {
+      console.log('Document created by another user:', message.DocumentTitle, 'by', message.UserName);
+
+      const newDocument = new DocumentModel(
+        message.DocumentID,
+        message.DocumentTitle,
+        [{ name: message.UserName, avatar: '' }],
+        1,
+        message.Timestamp,
+        []
+      );
+
       const existingDocuments = this.store.getState().documents;
-      const exists = existingDocuments.some(d => d.id === document.id);
+      const exists = existingDocuments.some(d => d.id === message.DocumentID);
 
       if (!exists) {
-        this.store.addDocument(document);
+        this.store.addDocument(newDocument);
+
+        this.notifyCallbacks({
+          message: `New document "${message.DocumentTitle}" created by ${message.UserName}`,
+          type: 'info',
+          duration: 5000
+        });
       }
     });
   }
@@ -110,5 +128,20 @@ export class DocumentService {
 
   getWebSocketStatus(): string {
     return this.wsService.getConnectionState();
+  }
+
+  onNotification(callback: (notification: NotificationData) => void): () => void {
+    this.notificationCallbacks.add(callback);
+    return () => this.notificationCallbacks.delete(callback);
+  }
+
+  private notifyCallbacks(notification: NotificationData): void {
+    this.notificationCallbacks.forEach(callback => {
+      try {
+        callback(notification);
+      } catch (error) {
+        console.error('Error in notification callback:', error);
+      }
+    });
   }
 }

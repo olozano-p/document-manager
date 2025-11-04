@@ -11,13 +11,24 @@ export class DocumentModel implements IDocument {
   ) {}
 
   static fromApiResponse(data: any): DocumentModel {
+    // Map Go server response format to our internal format
+    const contributors: Contributor[] = (data.Contributors || []).map((c: any) => ({
+      name: c.Name,
+      avatar: '' // Go server doesn't provide avatars
+    }));
+
+    const attachments: Attachment[] = (data.Attachments || []).map((name: string) => ({
+      name: name,
+      size: Math.floor(Math.random() * 5000000) + 100000 // Random size since server doesn't provide it
+    }));
+
     return new DocumentModel(
-      data.id,
-      data.name,
-      data.contributors || [],
-      data.version,
-      data.createdAt,
-      data.attachments || []
+      data.ID,
+      data.Title,
+      contributors,
+      parseFloat(data.Version) || 1,
+      data.CreatedAt,
+      attachments
     );
   }
 

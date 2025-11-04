@@ -1,8 +1,9 @@
 import { Document } from '../../types/index.js';
+import { DocumentModel } from '../models/Document.js';
 
 export class ApiService {
   private static instance: ApiService;
-  private baseUrl = 'http://localhost:3001';
+  private baseUrl = 'http://localhost:8080';
 
   static getInstance(): ApiService {
     if (!ApiService.instance) {
@@ -20,7 +21,10 @@ export class ApiService {
       }
 
       const data = await response.json();
-      return Array.isArray(data) ? data : [];
+      if (Array.isArray(data)) {
+        return data.map(item => DocumentModel.fromApiResponse(item));
+      }
+      return [];
     } catch (error) {
       console.error('Failed to fetch documents:', error);
       throw new Error('Failed to fetch documents. Please check if the server is running.');

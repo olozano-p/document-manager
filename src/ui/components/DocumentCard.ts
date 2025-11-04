@@ -27,7 +27,7 @@ export class DocumentCard extends HTMLElement {
   private render() {
     if (!this.document) return;
 
-    const { name, contributors, version, createdAt, attachments } = this.document;
+    const { name, contributors = [], version, createdAt, attachments = [] } = this.document;
 
     this.shadowRoot!.innerHTML = `
       <style>

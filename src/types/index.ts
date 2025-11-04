@@ -32,5 +32,13 @@ export interface NotificationData {
   duration?: number;
 }
 
+export interface WebSocketMessage {
+  Timestamp: string;
+  UserID: string;
+  UserName: string;
+  DocumentID: string;
+  DocumentTitle: string;
+}
+
 export type SortOption = 'name' | 'version' | 'createdAt';
 export type ViewMode = 'list' | 'grid';

@@ -1,12 +1,12 @@
-import { Document } from '../../types/index.js';
+import { Document, WebSocketMessage } from '../../types/index.js';
 
-export type WebSocketEventHandler = (document: Document) => void;
+export type WebSocketEventHandler = (message: WebSocketMessage) => void;
 export type ConnectionStatusHandler = (status: 'connected' | 'disconnected' | 'connecting' | 'error') => void;
 
 export class WebSocketService {
   private static instance: WebSocketService;
   private ws: WebSocket | null = null;
-  private url = 'ws://localhost:3001';
+  private url = 'ws://localhost:8080/notifications';
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
@@ -39,8 +39,8 @@ export class WebSocketService {
 
       this.ws.onmessage = (event) => {
         try {
-          const document = JSON.parse(event.data);
-          this.notifyDocumentHandlers(document);
+          const message = JSON.parse(event.data) as WebSocketMessage;
+          this.notifyDocumentHandlers(message);
         } catch (error) {
           console.error('Failed to parse WebSocket message:', error);
         }
@@ -79,7 +79,7 @@ export class WebSocketService {
     this.statusHandlers.clear();
   }
 
-  onDocumentReceived(handler: WebSocketEventHandler): () => void {
+  onMessageReceived(handler: WebSocketEventHandler): () => void {
     this.documentHandlers.add(handler);
     return () => this.documentHandlers.delete(handler);
   }
@@ -106,10 +106,10 @@ export class WebSocketService {
     }, delay);
   }
 
-  private notifyDocumentHandlers(document: Document): void {
+  private notifyDocumentHandlers(message: WebSocketMessage): void {
     this.documentHandlers.forEach(handler => {
       try {
-        handler(document);
+        handler(message);
       } catch (error) {
         console.error('Error in document handler:', error);
       }

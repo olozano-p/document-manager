@@ -11,6 +11,7 @@ export class DocumentManager extends HTMLElement {
   private notificationBanner?: NotificationBanner;
   private createModal?: CreateDocumentModal;
   private unsubscribe?: () => void;
+  private notificationUnsubscribe?: () => void;
 
   constructor() {
     super();
@@ -26,6 +27,7 @@ export class DocumentManager extends HTMLElement {
 
   disconnectedCallback() {
     this.unsubscribe?.();
+    this.notificationUnsubscribe?.();
     this.documentService.destroy();
   }
 
@@ -36,6 +38,10 @@ export class DocumentManager extends HTMLElement {
 
     this.unsubscribe = this.documentService.subscribeToStateChanges((state: AppState) => {
       this.updateUI(state);
+    });
+
+    this.notificationUnsubscribe = this.documentService.onNotification((notification) => {
+      this.notificationBanner?.showNotification(notification);
     });
 
     this.documentList?.setLoading(true);
