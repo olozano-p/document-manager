@@ -15,7 +15,6 @@ export class DocumentManager extends HTMLElement {
 
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
     this.documentService = DocumentService.getInstance();
   }
 
@@ -31,10 +30,11 @@ export class DocumentManager extends HTMLElement {
     this.documentService.destroy();
   }
 
+
   private async initialize() {
-    this.documentList = this.shadowRoot!.querySelector('document-list') as DocumentList;
-    this.notificationBanner = this.shadowRoot!.querySelector('notification-banner') as NotificationBanner;
-    this.createModal = this.shadowRoot!.querySelector('create-document-modal') as CreateDocumentModal;
+    this.documentList = this.querySelector('document-list') as DocumentList;
+    this.notificationBanner = this.querySelector('notification-banner') as NotificationBanner;
+    this.createModal = this.querySelector('create-document-modal') as CreateDocumentModal;
 
     this.unsubscribe = this.documentService.subscribeToStateChanges((state: AppState) => {
       this.updateUI(state);
@@ -63,8 +63,8 @@ export class DocumentManager extends HTMLElement {
   }
 
   private setupEventListeners() {
-    this.shadowRoot!.addEventListener('click', this.handleClick.bind(this));
-    this.shadowRoot!.addEventListener('change', this.handleChange.bind(this));
+    this.addEventListener('click', this.handleClick.bind(this));
+    this.addEventListener('change', this.handleChange.bind(this));
   }
 
   private handleClick(e: Event) {
@@ -104,7 +104,7 @@ export class DocumentManager extends HTMLElement {
   }
 
   private async refreshDocuments() {
-    const refreshButton = this.shadowRoot!.querySelector('.refresh-button') as HTMLButtonElement;
+    const refreshButton = this.querySelector('.refresh-button') as HTMLButtonElement;
     refreshButton.disabled = true;
 
     try {
@@ -149,7 +149,7 @@ export class DocumentManager extends HTMLElement {
   }
 
   private updateViewToggleButton(viewMode: 'list' | 'grid') {
-    const toggleButton = this.shadowRoot!.querySelector('.view-toggle') as HTMLButtonElement;
+    const toggleButton = this.querySelector('.view-toggle') as HTMLButtonElement;
     const icon = toggleButton?.querySelector('.toggle-icon');
 
     if (icon && toggleButton) {
@@ -162,165 +162,14 @@ export class DocumentManager extends HTMLElement {
   }
 
   private updateSortSelect(sortBy: SortOption, sortOrder: 'asc' | 'desc') {
-    const sortSelect = this.shadowRoot!.querySelector('.sort-select') as HTMLSelectElement;
+    const sortSelect = this.querySelector('.sort-select') as HTMLSelectElement;
     if (sortSelect) {
       sortSelect.value = `${sortBy}-${sortOrder}`;
     }
   }
 
   private render() {
-    this.shadowRoot!.innerHTML = `
-      <style>
-        :host {
-          display: block;
-          min-height: 100vh;
-          background: #f9fafb;
-        }
-
-        .container {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-
-        .header {
-          background: white;
-          border-radius: 12px;
-          padding: 24px;
-          margin-bottom: 24px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-content {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 20px;
-          flex-wrap: wrap;
-        }
-
-        .title-section {
-          flex: 1;
-          min-width: 200px;
-        }
-
-        .main-title {
-          margin: 0 0 4px 0;
-          font-size: 28px;
-          font-weight: 700;
-          color: #111827;
-        }
-
-        .subtitle {
-          margin: 0;
-          color: #6b7280;
-          font-size: 16px;
-        }
-
-        .controls {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          flex-wrap: wrap;
-        }
-
-        .sort-select {
-          padding: 8px 12px;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          font-size: 14px;
-          color: #374151;
-          background: white;
-        }
-
-        .sort-select:focus {
-          outline: none;
-          border-color: #4f46e5;
-          box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        .button {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px 16px;
-          border: 1px solid;
-          border-radius: 6px;
-          font-size: 14px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .button-secondary {
-          background: white;
-          color: #374151;
-          border-color: #d1d5db;
-        }
-
-        .button-secondary:hover:not(:disabled) {
-          background: #f9fafb;
-          border-color: #9ca3af;
-        }
-
-        .button-primary {
-          background: #4f46e5;
-          color: white;
-          border-color: #4f46e5;
-        }
-
-        .button-primary:hover:not(:disabled) {
-          background: #4338ca;
-          border-color: #4338ca;
-        }
-
-        .main-content {
-          background: white;
-          border-radius: 12px;
-          padding: 24px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-          min-height: 400px;
-        }
-
-        @media (max-width: 768px) {
-          .container {
-            padding: 12px;
-          }
-
-          .header {
-            padding: 16px;
-            margin-bottom: 16px;
-          }
-
-          .header-content {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 16px;
-          }
-
-          .controls {
-            justify-content: stretch;
-          }
-
-          .controls > * {
-            flex: 1;
-            min-width: 120px;
-          }
-
-          .main-title {
-            font-size: 24px;
-          }
-
-          .main-content {
-            padding: 16px;
-          }
-        }
-      </style>
+    this.innerHTML = `
 
       <div class="container">
         <header class="header">

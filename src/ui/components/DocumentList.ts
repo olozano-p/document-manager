@@ -8,7 +8,6 @@ export class DocumentList extends HTMLElement {
 
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
   }
 
   connectedCallback() {
@@ -22,8 +21,15 @@ export class DocumentList extends HTMLElement {
 
   setViewMode(isGridMode: boolean) {
     this.isGridMode = isGridMode;
+    // Update CSS class for grid mode styling
+    if (isGridMode) {
+      this.classList.add('grid-mode');
+    } else {
+      this.classList.remove('grid-mode');
+    }
     this.render();
   }
+
 
   setLoading(isLoading: boolean) {
     this.isLoading = isLoading;
@@ -31,71 +37,7 @@ export class DocumentList extends HTMLElement {
   }
 
   private render() {
-    this.shadowRoot!.innerHTML = `
-      <style>
-        :host {
-          display: block;
-          width: 100%;
-        }
-
-        .container {
-          min-height: 200px;
-        }
-
-        .loading {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 60px 20px;
-          color: #6b7280;
-        }
-
-        .loading-spinner {
-          width: 24px;
-          height: 24px;
-          border: 2px solid #e5e7eb;
-          border-top: 2px solid #4f46e5;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          margin-right: 12px;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        .documents-grid {
-          display: grid;
-          gap: 16px;
-          grid-template-columns: ${this.isGridMode ? 'repeat(auto-fill, minmax(300px, 1fr))' : '1fr'};
-        }
-
-        .empty-state {
-          text-align: center;
-          padding: 60px 20px;
-          color: #6b7280;
-        }
-
-        .empty-state h3 {
-          margin: 0 0 8px 0;
-          font-size: 18px;
-          font-weight: 600;
-          color: #374151;
-        }
-
-        .empty-state p {
-          margin: 0;
-          font-size: 14px;
-        }
-
-        @media (max-width: 768px) {
-          .documents-grid {
-            grid-template-columns: 1fr;
-            gap: 12px;
-          }
-        }
-      </style>
+    this.innerHTML = `
 
       <div class="container">
         ${this.renderContent()}
@@ -134,7 +76,7 @@ export class DocumentList extends HTMLElement {
   }
 
   updated() {
-    const cardElements = this.shadowRoot!.querySelectorAll('document-card') as NodeListOf<DocumentCard>;
+    const cardElements = this.querySelectorAll('document-card') as NodeListOf<DocumentCard>;
 
     cardElements.forEach((card, index) => {
       const document = this.documents[index];

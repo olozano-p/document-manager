@@ -1,0 +1,69 @@
+/* DocumentList Component Styles */
+document-list {
+  display: block;
+  width: 100%;
+}
+
+.container {
+  min-height: 200px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e5e7eb;
+  border-top: 2px solid #4f46e5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.documents-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: var(--grid-columns, 1fr);
+}
+
+/* Grid mode styles */
+:host(.grid-mode) .documents-grid {
+  --grid-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.empty-state h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .documents-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
